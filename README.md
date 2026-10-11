@@ -33,3 +33,13 @@ bottom y (`base`) and return the new top: `b.hut(mat, x, base, w, h)`,
 `b.post`, `b.beam`, `b.crate`, `b.hay` (static platform), `b.coon(x, base, type)`.
 Ground is at `G = 900`; the slingshot is at x = 250; keep forts within x ≈ 950–1750.
 Materials: `wood`, `glass`, `stone`. Raccoon types: `coon`, `hat`, `king`.
+
+## Credits
+
+- Art, sound, levels and code: original to this project.
+- Physics: [Matter.js](https://brm.io/matter-js/) by Liam Brummitt, MIT License, loaded from cdnjs.
+- Fonts: Titan One and Nunito from Google Fonts, SIL Open Font License 1.1.
+
+## License
+
+MIT (see [`LICENSE`](LICENSE)).
