@@ -3,6 +3,7 @@
 A physics slingshot game. The raccoons raided the henhouse and ate every egg;
 the hens take it personally.
 
+- **Play:** https://games.nouriloop.com/cranky-coop/ (published from `main`)
 - **Play locally:** https://cranky-coop.localhost:8443 (Caddy serves this directory)
 - **Engine:** [Matter.js](https://brm.io/matter-js/) 0.20.0 from cdnjs; everything else
   (art, sound, levels) is hand-drawn canvas and synthesized Web Audio in `game.html`.
@@ -11,6 +12,9 @@ the hens take it personally.
 
 `game.html` is the page body (also what gets published as the claude.ai artifact).
 `./build.sh` syntax-checks the script and wraps it into `index.html`.
+It refuses to build when the script doesn't parse or can't be found. The git
+hooks in `githooks/` (`git config core.hooksPath githooks`) run it before each
+commit, and CI runs it on every pull request.
 
 ## How to play
 
