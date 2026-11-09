@@ -1,0 +1,10 @@
+#!/bin/sh
+# git merge (and git pull) run this hook, not post-commit: same reminder when
+# the merge brought in a game.html change.
+if git rev-parse -q --verify ORIG_HEAD >/dev/null \
+  && git diff --name-only ORIG_HEAD HEAD | grep -qx 'game.html'; then
+  echo
+  echo "game.html changed: the claude.ai artifact is now behind."
+  echo "Ask Claude Code to republish game.html to https://claude.ai/artifact/A3v6QaaFkAV96H7niCF7Yu"
+  echo
+fi

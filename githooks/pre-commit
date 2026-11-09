@@ -1,0 +1,27 @@
+#!/bin/sh
+# Runs before every commit: ./build.sh on the staged game.html (the game script
+# must parse) and a scan of the staged files for bidi control characters.
+# Enable with: git config core.hooksPath githooks
+set -eu
+
+ROOT="$(git rev-parse --show-toplevel)"
+cd "$ROOT"
+
+staged=$(mktemp --suffix=.html)
+trap 'rm -f "$staged"' EXIT
+git show :game.html >"$staged" || { echo "pre-commit: game.html is not in the index" >&2; exit 1; }
+./build.sh "$staged" || { echo "pre-commit: build.sh refused the staged game.html (above)" >&2; exit 1; }
+
+# U+202A-U+202E and U+2066-U+2069 can make code read differently from how it
+# runs. git grep exits 0 on a match, 1 on none, and anything else on an error,
+# which must not pass as clean.
+status=0
+# UTF-8 even when the caller runs in the C locale, where -P rejects the pattern.
+LC_ALL=C.UTF-8 git grep --cached -lP '[\x{202A}-\x{202E}\x{2066}-\x{2069}]' || status=$?
+case "$status" in
+  0) echo "pre-commit: the staged files above contain bidi control characters" >&2; exit 1 ;;
+  1) ;;
+  *) echo "pre-commit: the bidi scan could not run (git grep exit $status)" >&2; exit 1 ;;
+esac
+
+echo "pre-commit: build and bidi scan passed"

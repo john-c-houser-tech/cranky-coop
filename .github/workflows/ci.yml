@@ -1,0 +1,71 @@
+# CI: ./build.sh (the game script must parse; node --check) and a bidi scan.
+# No secrets, no network beyond the checkout.
+# The ruleset on main requires the one "CI result" check; keep that job's name.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main, dev]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: The game script parses, and index.html builds
+        run: |
+          node --version
+          ./build.sh
+          test -s index.html
+
+  bidi:
+    name: Bidi scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: No bidi control characters
+        # git grep: 0 = match, 1 = none, anything else = it couldn't run.
+        run: |
+          status=0
+          git grep -lP '[\x{202A}-\x{202E}\x{2066}-\x{2069}]' || status=$?
+          case "$status" in
+            0) echo "The files above contain bidi control characters."; exit 1 ;;
+            1) echo "No bidi control characters." ;;
+            *) echo "The bidi scan could not run (git grep exit $status)."; exit 1 ;;
+          esac
+
+  # The one check main's ruleset requires.
+  result:
+    name: CI result
+    if: always()
+    needs: [build, bidi]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Every job passed or was skipped
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "$RESULTS"
+          for result in $RESULTS; do
+            case "$result" in
+              success|skipped) ;;
+              *) exit 1 ;;
+            esac
+          done
