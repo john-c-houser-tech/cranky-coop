@@ -1,0 +1,15 @@
+#!/bin/sh
+# Remind to republish the claude.ai artifact when the game source changes.
+# Compared with the first parent, so a merge that brings in a game.html change
+# reminds too; the first commit is compared with nothing.
+if git rev-parse -q --verify HEAD^ >/dev/null; then
+  changed=$(git diff --name-only HEAD^ HEAD)
+else
+  changed=$(git show --pretty=format: --name-only HEAD)
+fi
+if printf '%s\n' "$changed" | grep -qx 'game.html'; then
+  echo
+  echo "game.html changed: the claude.ai artifact is now behind."
+  echo "Ask Claude Code to republish game.html to https://claude.ai/artifact/A3v6QaaFkAV96H7niCF7Yu"
+  echo
+fi
